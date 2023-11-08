@@ -121,6 +121,17 @@ def _build(self, X, y, depth=0):
     return Node(
         value=Counter(y).most_common(1)[0][0]
     )
+    
+    # traverses tree to classify a single instance
+
+def fit(self, X, y):
+    # trains decision tree
+    # X array of features
+    # y array of targets
+    
+    self.root = self.build(X,y)
+    
+    
             
                 
                 
