@@ -12,22 +12,24 @@ class Node:
         self.gain = gain
         self.value = value
         
-class DeciscionTree:
+class DecisionTree:
     
     def __init__(self, min_samples_split=2, max_depth=5):
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
         self.root = None
 
+    @staticmethod
     def _entropy(s):
 
-        count = np.bincount(s)
+        count = np.bincount(np.array(s, dtype=np.int64))
         probabilities = count/len(s)
         
+        entropy = 0
         for probability in probabilities:
             if probability > 0:
                 entropy += probability*np.log2(probability)
-        return - entropy
+        return -entropy
 
 
     def _information_gain(self, parent,left_child,right_child):
@@ -49,7 +51,7 @@ class DeciscionTree:
         
         for f_idx in range(n_cols):
             # X columns
-            X_now = X[:,f_idx]
+            X_now = X[:, f_idx]
             # value of every unique feature
             for threshold in np.unique(X_now):
                 # construct a data set split it into right and left
@@ -82,79 +84,79 @@ class DeciscionTree:
         return best_split
     
 
-def _build(self, X, y, depth=0):
-    # builds decision tree
-    
-    # X feature vector
-    # y target vector
-    # current depth of tree (base case)
-    # returns node
-    
-    n_rows, n_cols = X.shape
-    
-    # check if node should be a leaf
-    if n_rows >= self.min_samples_split and depth <= self.max_depth:
-        # get best split
-        best = self.best_split(X,y)
-        # if the split is bad
-        if best['gain'] > 0:
-            # build left side of tree
-            left = self._build(
-                X=best['df_left'][:,:-1],
-                y=best['df_left'][:,:-1],
-                depth=depth + 1
-            )
-            # build right side of tree
-            right = self._build(
-                X=best['df_right'][:,:-1],
-                y=best['df_right'][:,:-1],
-                depth=depth + 1
-            )
-            return Node(
-                feature=best['feature_index'],
-                threshold=best['threshold'],
-                data_left=left,
-                data_right=right,
-                gain=best['gain']
-            )
-    # leaf node is the most common target value
-    return Node(
-        value=Counter(y).most_common(1)[0][0]
-    )
-    
-    # traverses tree to classify a single instance
+    def _build(self, X, y, depth=0):
+        # builds decision tree
+        
+        # X feature vector
+        # y target vector
+        # current depth of tree (base case)
+        # returns node
+        
+        n_rows, n_cols = X.shape
+        
+        # check if node should be a leaf
+        if n_rows >= self.min_samples_split and depth <= self.max_depth:
+            # get best split
+            best = self.best_split(X,y)
+            # if the split is bad
+            if best['gain'] > 0:
+                # build left side of tree
+                left = self._build(
+                    X=best['df_left'][:,:-1],
+                    y=best['df_left'][:,-1],
+                    depth=depth + 1
+                )
+                # build right side of tree
+                right = self._build(
+                    X=best['df_right'][:,:-1],
+                    y=best['df_right'][:,-1],
+                    depth=depth + 1
+                )
+                return Node(
+                    feature=best['feature_index'],
+                    threshold=best['threshold'],
+                    data_left=left,
+                    data_right=right,
+                    gain=best['gain']
+                )
+        # leaf node is the most common target value
+        return Node(
+            value=Counter(y).most_common(1)[0][0]
+        )
+        
+        # traverses tree to classify a single instance
 
-def fit(self, X, y):
-    # trains decision tree
-    # X array of features
-    # y array of targets
-    
-    self.root = self.build(X,y)
-    
-def _predict(self, x, tree):
-    
-    # recursively traverses tree to classify x
-    
-    # leaf node base case
-    if tree.value !=None:
-        return tree.value
-    feature_value = x[tree.feature]
-    
-    # go to left
-    if feature_value <= tree.threshold:
-        return self.predict(x=x, tree=tree.data_left)
-    
-    # go to right
-    if feature_value > tree.threshold:
-        return self.predict(x=x, tree=tree.data_right)    
-            
-def new_predict(self, X):
-    
-    # classifies new instances
-    
-    # calls predict function to every observation
-    
-    return[self.predict(x, self.root) for x in X]
+    def fit(self, X, y):
+        # trains decision tree
+        # X array of features
+        # y array of targets
+        
+        self.root = self._build(X,y)
+        
+    def _predict(self, x, tree):
+        
+        # recursively traverses tree to classify x
+        
+        # leaf node base case
+        if tree.value !=None:
+            return tree.value
+        feature_value = x[tree.feature]
+        
+        # go to left
+        if feature_value <= tree.threshold:
+            return self._predict(x=x, tree=tree.data_left)
+        
+        # go to right
+        if feature_value > tree.threshold:
+            return self._predict(x=x, tree=tree.data_right)    
+                
+    def new_predict(self, X):
+        
+        # classifies new instances
+        
+        # calls predict function to every observation
+        
+        return[self._predict(x, self.root) for x in X]
                 
                 
 
